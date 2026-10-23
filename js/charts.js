@@ -255,8 +255,17 @@ function renderTopEntes(d){
   // Calcula entes auditados en TODOS los años del periodo filtrado
   const cont = document.getElementById("entes-permanentes");
   if(!cont) return;
-  const aniosDisponibles = unique(d.map(r=>r.anio).filter(x=>x)).sort();
+  // Los años de referencia son TODOS los de la base (no solo los filtrados):
+  // un ente es permanente si fue auditado en todos los ejercicios existentes.
+  const aniosDisponibles = unique(RAW_DATA.map(r=>r.anio).filter(x=>x)).sort();
   const totalAnios = aniosDisponibles.length;
+  // Historial completo de años por ente (sin filtros)
+  const enteAniosTodos = {};
+  RAW_DATA.forEach(r=>{
+    if(!enteAniosTodos[r.entidad]) enteAniosTodos[r.entidad] = new Set();
+    enteAniosTodos[r.entidad].add(r.anio);
+  });
+  // Entes presentes en la selección filtrada
   const enteAnios = {};
   const enteNat = {};
   d.forEach(r=>{
@@ -264,8 +273,8 @@ function renderTopEntes(d){
     enteAnios[r.entidad].add(r.anio);
     enteNat[r.entidad] = r.naturaleza || "SIN CLASIFICAR";
   });
-  // Permanentes = auditados en todos los años del periodo
-  const permanentes = Object.keys(enteAnios).filter(e => enteAnios[e].size === totalAnios && totalAnios>0);
+  // Permanentes = entes de la selección que han sido auditados en todos los años de la base
+  const permanentes = Object.keys(enteAnios).filter(e => totalAnios>0 && enteAniosTodos[e].size === totalAnios);
   permanentes.sort();
   const totalEntes = Object.keys(enteAnios).length;
   const pctPerm = totalEntes>0 ? Math.round(permanentes.length/totalEntes*100) : 0;
@@ -284,16 +293,16 @@ function renderTopEntes(d){
   });
 
   let html = `<div class="perm-intro">
-    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> del periodo. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
+    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> registrados. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
   </div>
   <div class="perm-stats">
     <div class="perm-stat"><div class="n">${permanentes.length}</div><div class="l">Entes permanentes</div></div>
-    <div class="perm-stat"><div class="n">${pctPerm}%</div><div class="l">del total auditado</div></div>
+    <div class="perm-stat"><div class="n">${pctPerm}%</div><div class="l">de los entes seleccionados</div></div>
     <div class="perm-stat"><div class="n">${totalAnios}</div><div class="l">Ejercicios cubiertos</div></div>
   </div>`;
 
   if(permanentes.length === 0){
-    html += `<div style="padding:20px;text-align:center;color:#7a8693;font-style:italic;">No hay entes auditados en todos los años del filtro actual.</div>`;
+    html += `<div style="padding:20px;text-align:center;color:#7a8693;font-style:italic;">Ningún ente de la selección actual ha sido auditado en todos los años.</div>`;
   } else {
     naturalezasOrdenadas.forEach(n=>{
       html += `<div class="perm-group">
