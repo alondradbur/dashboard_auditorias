@@ -270,6 +270,7 @@ function normalizarDatosFuente(datos) {
         obra_solv: convertirNumero(obtenerValor(registro, ["obra_solv", "obra_solventada", "obra_publica_solventada", "obra_publica_solventados", "obra_pública_solventados"], 0)),
         ingresos_solv: convertirNumero(obtenerValor(registro, ["ingresos_solv", "ingresos_solventado", "ingresos_solventados"], 0)),
         presup_solv: convertirNumero(obtenerValor(registro, ["presup_solv", "presupuestal_solventado", "presupuestales_solventado"], 0)),
+        cumpl_solv: convertirNumero(obtenerValor(registro, ["cumpl_solv", "cumplimiento_solventado", "cumplimiento_solventados"], 0)),
         total_solv: convertirNumero(obtenerValor(registro, ["total_solv", "total_solventado", "total_solventados", "monto_total_solventado"], 0)),
 
         obs_no_solv: convertirNumero(obtenerValor(registro, [
@@ -288,6 +289,7 @@ function normalizarDatosFuente(datos) {
         obra_no_solv: convertirNumero(obtenerValor(registro, ["obra_no_solv", "obra_no_solventada", "obra_publica_no_solventada", "obra_publica_no_solventados", "obra_pública_no_solventados"], 0)),
         ingresos_no_solv: convertirNumero(obtenerValor(registro, ["ingresos_no_solv", "ingresos_no_solventado", "ingresos_no_solventados"], 0)),
         presup_no_solv: convertirNumero(obtenerValor(registro, ["presup_no_solv", "presupuestal_no_solventado", "presupuestales_no_solventado", "presupuestales_no_solventados"], 0)),
+        cumpl_no_solv: convertirNumero(obtenerValor(registro, ["cumpl_no_solv", "cumplimiento_no_solventado", "cumplimiento_no_solventados"], 0)),
         total_no_solv: convertirNumero(obtenerValor(registro, ["total_no_solv", "total_no_solventado", "total_no_solventados", "monto_total_no_solventado"], 0)),
 
         presup_mod_ing: convertirNumero(obtenerValor(registro, ["presup_mod_ing", "presupuesto_modificado_ingresos", "presupuesto_modificado_ing"], 0)),
@@ -329,15 +331,15 @@ function normalizarDatosFuente(datos) {
       }
 
       if (!r.total_fincado) {
-        r.total_fincado = r.egresos_fincado + r.obra_fincado + r.ingresos_fincado + r.presup_fincado;
+        r.total_fincado = r.cumpl_fincado + r.egresos_fincado + r.obra_fincado + r.ingresos_fincado + r.presup_fincado;
       }
 
       if (!r.total_solv) {
-        r.total_solv = r.egresos_solv + r.obra_solv + r.ingresos_solv + r.presup_solv;
+        r.total_solv = r.cumpl_solv + r.egresos_solv + r.obra_solv + r.ingresos_solv + r.presup_solv;
       }
 
       if (!r.total_no_solv) {
-        r.total_no_solv = r.egresos_no_solv + r.obra_no_solv + r.ingresos_no_solv + r.presup_no_solv;
+        r.total_no_solv = r.cumpl_no_solv + r.egresos_no_solv + r.obra_no_solv + r.ingresos_no_solv + r.presup_no_solv;
       }
 
       if (r.entidad === "Municipo de Loreto") {
