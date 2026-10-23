@@ -52,7 +52,10 @@ let sortKey = "anio", sortAsc = false;
 
 // Helpers
 const fmtN = n => new Intl.NumberFormat('es-MX').format(Math.round(n));
-const fmtMillions = n => "$" + new Intl.NumberFormat('es-MX',{maximumFractionDigits:1}).format(n/1e6);
+// Montos en pesos completos, con comas y signo de pesos (ej. $1,234,567.89)
+const fmtMoney = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
+// Versión sin centavos para los ejes de las gráficas
+const fmtMoneyAxis = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct = n => (Math.round(n*10)/10) + "%";
 
 
@@ -196,7 +199,7 @@ function renderKPIs(d){
   const obs = d.reduce((a,r)=>a+r.obs_no_solv,0);
   document.getElementById("kpi-obs").textContent = fmtN(obs);
   const monto = d.reduce((a,r)=>a+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv,0);
-  document.getElementById("kpi-monto").textContent = fmtMillions(monto);
+  document.getElementById("kpi-monto").textContent = fmtMoney(monto);
 }
 
 function destroyChart(key){ if(charts[key]){ charts[key].destroy(); delete charts[key]; } }
@@ -410,7 +413,7 @@ function renderFunnel(d){
     data:{labels:["Fincadas","Solventadas","No Solventadas"],
           datasets:[{label:"Observaciones", data:[fin,solv,nosolv],
             backgroundColor:[PALETTE.primary, PALETTE.good, PALETTE.bad]}]},
-    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false,
+    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:110}},
       layout:{padding:{right:50}},
       plugins:{
         legend:{display:false},
@@ -440,28 +443,28 @@ function renderObsTipo(d){
     d.reduce((s,r)=>s+r.obra_fincado,0),
     d.reduce((s,r)=>s+r.ingresos_fincado,0),
     d.reduce((s,r)=>s+r.presup_fincado,0)
-  ].map(v=>v/1e6);
+  ];
   const solv = [
     0,
     d.reduce((s,r)=>s+r.egresos_solv,0),
     d.reduce((s,r)=>s+r.obra_solv,0),
     d.reduce((s,r)=>s+r.ingresos_solv,0),
     d.reduce((s,r)=>s+r.presup_solv,0)
-  ].map(v=>v/1e6);
+  ];
   const nosolv = [
     0,
     d.reduce((s,r)=>s+r.egresos_no_solv,0),
     d.reduce((s,r)=>s+r.obra_no_solv,0),
     d.reduce((s,r)=>s+r.ingresos_no_solv,0),
     d.reduce((s,r)=>s+r.presup_no_solv,0)
-  ].map(v=>v/1e6);
+  ];
   destroyChart("obsTipo");
   charts.obsTipo = new Chart(document.getElementById("ch-obs-tipo"), {
     type:"bar",
     data:{labels:cats, datasets:[
-      {label:"Fincado (Mill.)", data:fincado, backgroundColor:PALETTE.primary},
-      {label:"Solventado (Mill.)", data:solv, backgroundColor:PALETTE.good},
-      {label:"No Solventado (Mill.)", data:nosolv, backgroundColor:PALETTE.bad}
+      {label:"Fincado", data:fincado, backgroundColor:PALETTE.primary},
+      {label:"Solventado", data:solv, backgroundColor:PALETTE.good},
+      {label:"No Solventado", data:nosolv, backgroundColor:PALETTE.bad}
     ]},
     options:{responsive:true, maintainAspectRatio:false,
       plugins:{
@@ -471,7 +474,7 @@ function renderObsTipo(d){
           const finc = ctx.chart.data.datasets[0].data[idx]||0;
           const v = ctx.parsed.y;
           const p = finc>0 ? Math.round(v/finc*100) : 0;
-          return ctx.dataset.label+": $"+v.toFixed(1)+" M ("+p+"% del Fincado)";
+          return ctx.dataset.label+": "+fmtMoney(v)+" ("+p+"% del Fincado)";
         }}},
         datalabels:{
           display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
@@ -485,7 +488,7 @@ function renderObsTipo(d){
           }
         }
       },
-      scales:{y:{beginAtZero:true, title:{display:true, text:"Millones $"}}}}
+      scales:{y:{beginAtZero:true, ticks:{callback:v=>fmtMoneyAxis(v)}, title:{display:true, text:"Pesos ($)"}}}}
   });
 }
 
@@ -524,18 +527,18 @@ function renderUnivMuestra(d){
     d.reduce((s,r)=>s+r.universo_ing,0),
     d.reduce((s,r)=>s+r.universo_egr,0),
     d.reduce((s,r)=>s+r.universo_obra,0)
-  ].map(v=>v/1e6);
+  ];
   const muestra = [
     d.reduce((s,r)=>s+r.muestra_ing,0),
     d.reduce((s,r)=>s+r.muestra_egr,0),
     d.reduce((s,r)=>s+r.muestra_obra,0)
-  ].map(v=>v/1e6);
+  ];
   destroyChart("univMuestra");
   charts.univMuestra = new Chart(document.getElementById("ch-univ-muestra"), {
     type:"bar",
     data:{labels:cats, datasets:[
-      {label:"Universo (Mill.)", data:universo, backgroundColor:PALETTE.secondary},
-      {label:"Muestra (Mill.)", data:muestra, backgroundColor:PALETTE.accent}
+      {label:"Universo", data:universo, backgroundColor:PALETTE.secondary},
+      {label:"Muestra", data:muestra, backgroundColor:PALETTE.accent}
     ]},
     options:{responsive:true, maintainAspectRatio:false,
       plugins:{
@@ -545,7 +548,7 @@ function renderUnivMuestra(d){
           const univ = ctx.chart.data.datasets[0].data[idx]||0;
           const v = ctx.parsed.y;
           const p = univ>0 ? Math.round(v/univ*100) : 0;
-          return ctx.dataset.label+": $"+v.toFixed(1)+" M ("+p+"% del Universo)";
+          return ctx.dataset.label+": "+fmtMoney(v)+" ("+p+"% del Universo)";
         }}},
         datalabels:{
           display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
@@ -559,7 +562,7 @@ function renderUnivMuestra(d){
           }
         }
       },
-      scales:{y:{beginAtZero:true, title:{display:true, text:"Millones $"}}}}
+      scales:{y:{beginAtZero:true, ticks:{callback:v=>fmtMoneyAxis(v)}, title:{display:true, text:"Pesos ($)"}}}}
   });
 }
 
@@ -600,10 +603,10 @@ function renderTopMonto(d){
   charts.topMonto = new Chart(document.getElementById("ch-top-monto"), {
     type:"bar",
     data:{labels:top.map(t=>t[0].length>35?t[0].slice(0,33)+"...":t[0]),
-          datasets:[{label:"Mill. $", data:top.map(t=>t[1]/1e6), backgroundColor:PALETTE.bad}]},
-    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, datalabels:{anchor:"end", align:"end", formatter:v=>"$"+v.toFixed(1), font:{weight:"bold"}, color:PALETTE.ink}},
-      scales:{x:{beginAtZero:true, title:{display:true, text:"Millones $"}}}}
+          datasets:[{label:"Monto no solventado", data:top.map(t=>t[1]), backgroundColor:PALETTE.bad}]},
+    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:110}},
+      plugins:{legend:{display:false}, datalabels:{anchor:"end", align:"end", formatter:v=>fmtMoney(v), font:{weight:"bold"}, color:PALETTE.ink}},
+      scales:{x:{beginAtZero:true, ticks:{callback:v=>fmtMoneyAxis(v)}, title:{display:true, text:"Pesos ($)"}}}}
   });
 }
 
@@ -621,12 +624,12 @@ function renderMontoCat(d){
     type:"line",
     data:{labels:anios, datasets:ds.map(s=>({
       label:s.label,
-      data:anios.map(a=>d.filter(r=>r.anio===a).reduce((sum,r)=>sum+r[s.key],0)/1e6),
+      data:anios.map(a=>d.filter(r=>r.anio===a).reduce((sum,r)=>sum+r[s.key],0)),
       borderColor:s.color, backgroundColor:s.color+"55", fill:true, tension:.3
     }))},
     options:{responsive:true, maintainAspectRatio:false,
       plugins:{legend:{position:"bottom"}, datalabels:{display:false}},
-      scales:{y:{stacked:true, beginAtZero:true, title:{display:true, text:"Millones $"}}}}
+      scales:{y:{stacked:true, beginAtZero:true, ticks:{callback:v=>fmtMoneyAxis(v)}, title:{display:true, text:"Pesos ($)"}}}}
   });
 }
 
@@ -635,9 +638,9 @@ function renderEficiencia(d){
   const muestra = d.reduce((s,r)=>s+r.muestra_total,0);
   const noSolv = d.reduce((s,r)=>s+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv,0);
   const dif = muestra - noSolv;
-  document.getElementById("ef-muestra").textContent = fmtMillions(muestra);
-  document.getElementById("ef-no-solv").textContent = fmtMillions(noSolv);
-  document.getElementById("ef-dif").textContent = fmtMillions(dif);
+  document.getElementById("ef-muestra").textContent = fmtMoney(muestra);
+  document.getElementById("ef-no-solv").textContent = fmtMoney(noSolv);
+  document.getElementById("ef-dif").textContent = fmtMoney(dif);
   document.getElementById("ef-dif-sub").textContent = muestra>0 ? `${fmtPct(dif/muestra*100)} de la muestra fiscalizada` : "";
 }
 
@@ -666,7 +669,7 @@ function renderRanking(searchTerm){
       <td>${r.tipo||""}</td>
       <td><span class="badge ${dictColor}">${r.dictamen||"-"}</span></td>
       <td>${fmtPct(r.porc_final_no_solv*100)}</td>
-      <td>${fmtMillions(monto)}</td>
+      <td>${fmtMoney(monto)}</td>
       <td><button class="expand-btn" onclick="toggleDetail(${idx})">▸</button></td>
     </tr>
     <tr class="row-detail-row" id="detail-${idx}" style="display:none;"><td colspan="7" class="row-detail">
@@ -677,18 +680,18 @@ function renderRanking(searchTerm){
         <div><b>Obs. Fincadas:</b> ${fmtN(r.obs_fincadas)}</div>
         <div><b>Obs. Solventadas:</b> ${fmtN(r.obs_solventadas)}</div>
         <div><b>Obs. No Solventadas:</b> ${fmtN(r.obs_no_solv)}</div>
-        <div><b>Total Fincado:</b> ${fmtMillions(r.egresos_fincado+r.obra_fincado+r.ingresos_fincado+r.presup_fincado)}</div>
-        <div><b>Total Solventado:</b> ${fmtMillions(r.egresos_solv+r.obra_solv+r.ingresos_solv+r.presup_solv)}</div>
-        <div><b>Egresos No Solv.:</b> ${fmtMillions(r.egresos_no_solv)}</div>
-        <div><b>Obra No Solv.:</b> ${fmtMillions(r.obra_no_solv)}</div>
-        <div><b>Ingresos No Solv.:</b> ${fmtMillions(r.ingresos_no_solv)}</div>
-        <div><b>Presupuestales No Solv.:</b> ${fmtMillions(r.presup_no_solv)}</div>
-        <div><b>Universo Ingresos:</b> ${fmtMillions(r.universo_ing)}</div>
-        <div><b>Muestra Ingresos:</b> ${fmtMillions(r.muestra_ing)}</div>
-        <div><b>Universo Egresos:</b> ${fmtMillions(r.universo_egr)}</div>
-        <div><b>Muestra Egresos:</b> ${fmtMillions(r.muestra_egr)}</div>
-        <div><b>Universo Obra:</b> ${fmtMillions(r.universo_obra)}</div>
-        <div><b>Muestra Obra:</b> ${fmtMillions(r.muestra_obra)}</div>
+        <div><b>Total Fincado:</b> ${fmtMoney(r.egresos_fincado+r.obra_fincado+r.ingresos_fincado+r.presup_fincado)}</div>
+        <div><b>Total Solventado:</b> ${fmtMoney(r.egresos_solv+r.obra_solv+r.ingresos_solv+r.presup_solv)}</div>
+        <div><b>Egresos No Solv.:</b> ${fmtMoney(r.egresos_no_solv)}</div>
+        <div><b>Obra No Solv.:</b> ${fmtMoney(r.obra_no_solv)}</div>
+        <div><b>Ingresos No Solv.:</b> ${fmtMoney(r.ingresos_no_solv)}</div>
+        <div><b>Presupuestales No Solv.:</b> ${fmtMoney(r.presup_no_solv)}</div>
+        <div><b>Universo Ingresos:</b> ${fmtMoney(r.universo_ing)}</div>
+        <div><b>Muestra Ingresos:</b> ${fmtMoney(r.muestra_ing)}</div>
+        <div><b>Universo Egresos:</b> ${fmtMoney(r.universo_egr)}</div>
+        <div><b>Muestra Egresos:</b> ${fmtMoney(r.muestra_egr)}</div>
+        <div><b>Universo Obra:</b> ${fmtMoney(r.universo_obra)}</div>
+        <div><b>Muestra Obra:</b> ${fmtMoney(r.muestra_obra)}</div>
       </div>
     </td></tr>`;
   }).join("");
@@ -763,7 +766,7 @@ function renderMultianual(){
       <td>${fmtN(r.ns)}</td>
       <td>${fmtPct(r.pctSol)}</td>
       <td>${arrow(r.pctSol, p?p.pctSol:null)}</td>
-      <td>${fmtMillions(r.monto)}</td>
+      <td>${fmtMoney(r.monto)}</td>
     </tr>`;
   }).join("");
 }
