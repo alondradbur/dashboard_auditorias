@@ -57,6 +57,10 @@ const fmtMoney = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'
 // Versión sin centavos para los ejes de las gráficas
 const fmtMoneyAxis = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct = n => (Math.round(n*10)/10) + "%";
+// Montos por registro: incluyen Cumplimiento + Egresos + Obra Pública + Ingresos + Presupuestales
+const montoFincado = r => (r.cumpl_fincado||0)+r.egresos_fincado+r.obra_fincado+r.ingresos_fincado+r.presup_fincado;
+const montoSolv    = r => (r.cumpl_solv||0)+r.egresos_solv+r.obra_solv+r.ingresos_solv+r.presup_solv;
+const montoNoSolv  = r => (r.cumpl_no_solv||0)+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv;
 
 
 function getFiltered(){
@@ -198,7 +202,7 @@ function renderKPIs(d){
   document.getElementById("kpi-aprob-sub").textContent = `${aprob} aprobados / ${noaprob} no aprobados`;
   const obs = d.reduce((a,r)=>a+r.obs_no_solv,0);
   document.getElementById("kpi-obs").textContent = fmtN(obs);
-  const monto = d.reduce((a,r)=>a+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv,0);
+  const monto = d.reduce((a,r)=>a+montoNoSolv(r),0);
   document.getElementById("kpi-monto").textContent = fmtMoney(monto);
 }
 
@@ -445,14 +449,14 @@ function renderObsTipo(d){
     d.reduce((s,r)=>s+r.presup_fincado,0)
   ];
   const solv = [
-    0,
+    d.reduce((s,r)=>s+r.cumpl_solv,0),
     d.reduce((s,r)=>s+r.egresos_solv,0),
     d.reduce((s,r)=>s+r.obra_solv,0),
     d.reduce((s,r)=>s+r.ingresos_solv,0),
     d.reduce((s,r)=>s+r.presup_solv,0)
   ];
   const nosolv = [
-    0,
+    d.reduce((s,r)=>s+r.cumpl_no_solv,0),
     d.reduce((s,r)=>s+r.egresos_no_solv,0),
     d.reduce((s,r)=>s+r.obra_no_solv,0),
     d.reduce((s,r)=>s+r.ingresos_no_solv,0),
@@ -595,7 +599,7 @@ function renderCobertura(d){
 function renderTopMonto(d){
   const map = {};
   d.forEach(r=>{
-    const m = r.egresos_no_solv + r.obra_no_solv + r.ingresos_no_solv + r.presup_no_solv;
+    const m = montoNoSolv(r);
     map[r.entidad] = (map[r.entidad]||0) + m;
   });
   const top = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -614,6 +618,7 @@ function renderTopMonto(d){
 function renderMontoCat(d){
   const anios = unique(d.map(r=>r.anio).filter(x=>x)).sort();
   const ds = [
+    {label:"Cumplimiento", key:"cumpl_no_solv", color:PALETTE.accent},
     {label:"Egresos", key:"egresos_no_solv", color:PALETTE.primary},
     {label:"Obra Pública", key:"obra_no_solv", color:PALETTE.warn},
     {label:"Ingresos", key:"ingresos_no_solv", color:PALETTE.good},
@@ -636,7 +641,7 @@ function renderMontoCat(d){
 
 function renderEficiencia(d){
   const muestra = d.reduce((s,r)=>s+r.muestra_total,0);
-  const noSolv = d.reduce((s,r)=>s+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv,0);
+  const noSolv = d.reduce((s,r)=>s+montoNoSolv(r),0);
   const dif = muestra - noSolv;
   document.getElementById("ef-muestra").textContent = fmtMoney(muestra);
   document.getElementById("ef-no-solv").textContent = fmtMoney(noSolv);
@@ -661,7 +666,7 @@ function renderRanking(searchTerm){
   });
   const tb = document.querySelector("#tbl-ranking tbody");
   tb.innerHTML = d.map((r,idx)=>{
-    const monto = r.egresos_no_solv + r.obra_no_solv + r.ingresos_no_solv + r.presup_no_solv;
+    const monto = montoNoSolv(r);
     const dictColor = r.dictamen==="Se Aprueba"?"green":r.dictamen==="No se aprueba"?"red":"gray";
     return `<tr class="row-main" data-idx="${idx}">
       <td>${r.anio}</td>
@@ -680,8 +685,9 @@ function renderRanking(searchTerm){
         <div><b>Obs. Fincadas:</b> ${fmtN(r.obs_fincadas)}</div>
         <div><b>Obs. Solventadas:</b> ${fmtN(r.obs_solventadas)}</div>
         <div><b>Obs. No Solventadas:</b> ${fmtN(r.obs_no_solv)}</div>
-        <div><b>Total Fincado:</b> ${fmtMoney(r.egresos_fincado+r.obra_fincado+r.ingresos_fincado+r.presup_fincado)}</div>
-        <div><b>Total Solventado:</b> ${fmtMoney(r.egresos_solv+r.obra_solv+r.ingresos_solv+r.presup_solv)}</div>
+        <div><b>Total Fincado:</b> ${fmtMoney(montoFincado(r))}</div>
+        <div><b>Total Solventado:</b> ${fmtMoney(montoSolv(r))}</div>
+        <div><b>Cumplimiento No Solv.:</b> ${fmtMoney(r.cumpl_no_solv)}</div>
         <div><b>Egresos No Solv.:</b> ${fmtMoney(r.egresos_no_solv)}</div>
         <div><b>Obra No Solv.:</b> ${fmtMoney(r.obra_no_solv)}</div>
         <div><b>Ingresos No Solv.:</b> ${fmtMoney(r.ingresos_no_solv)}</div>
@@ -744,7 +750,7 @@ function renderMultianual(){
     const ns = sub.reduce((s,r)=>s+r.obs_no_solv,0);
     const sol = sub.reduce((s,r)=>s+r.obs_solventadas,0);
     const pctSol = fin>0 ? sol/fin*100 : 0;
-    const monto = sub.reduce((s,r)=>s+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv,0);
+    const monto = sub.reduce((s,r)=>s+montoNoSolv(r),0);
     return {a,total,aprob,pctAp,fin,ns,pctSol,monto};
   });
   tb.innerHTML = rows.map((r,i)=>{
