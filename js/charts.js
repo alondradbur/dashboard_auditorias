@@ -313,7 +313,11 @@ function renderTopEntes(d){
       html += `<div class="perm-group">
         <div class="perm-group-title">${n} (${grupos[n].length})</div>`;
       grupos[n].forEach(e=>{
-        html += `<div class="perm-item">${e}</div>`;
+        const notas = (typeof ENTES_PERMANENTES_NOTAS!=="undefined") ? ENTES_PERMANENTES_NOTAS : {};
+        const claveNota = Object.keys(notas).find(k => _norm(k) === _norm(e));
+        html += claveNota
+          ? `<div class="perm-item">${e} *<div style="font-size:11px;font-weight:normal;color:#7a8693;font-style:italic;">${notas[claveNota]}</div></div>`
+          : `<div class="perm-item">${e}</div>`;
       });
       html += `</div>`;
     });
