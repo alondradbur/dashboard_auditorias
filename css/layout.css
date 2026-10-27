@@ -100,8 +100,8 @@
   .row-detail .grid div b{color:var(--primary-2);}
   .expand-btn{background:none;border:none;color:var(--primary);cursor:pointer;font-size:14px;font-weight:bold;}
   .arrow{display:inline-block;font-weight:bold;}
-  .arrow.up{color:var(--bad);}
-  .arrow.down{color:var(--good);}
+  .arrow.up{color:var(--good);}
+  .arrow.down{color:var(--bad);}
   .arrow.flat{color:var(--neutral);}
   footer{padding:22px 28px;color:var(--ink-soft);font-size:12px;border-top:3px solid #d4a437;background:var(--panel);}
   footer .footer-grid{display:flex;align-items:center;justify-content:center;gap:24px;max-width:1400px;margin:0 auto;}
