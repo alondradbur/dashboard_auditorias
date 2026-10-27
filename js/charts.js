@@ -296,7 +296,7 @@ function renderTopEntes(d){
   });
 
   let html = `<div class="perm-intro">
-    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> registrados, más los que la UEC incluye por decisión institucional por su continuidad reciente. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
+    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> registrados. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
   </div>
   <div class="perm-stats">
     <div class="perm-stat"><div class="n">${permanentes.length}</div><div class="l">Entes permanentes</div></div>
