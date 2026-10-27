@@ -274,7 +274,10 @@ function renderTopEntes(d){
     enteNat[r.entidad] = r.naturaleza || "SIN CLASIFICAR";
   });
   // Permanentes = entes de la selección que han sido auditados en todos los años de la base
-  const permanentes = Object.keys(enteAnios).filter(e => totalAnios>0 && enteAniosTodos[e].size === totalAnios);
+  const _norm = t => String(t||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const manuales = (typeof ENTES_PERMANENTES_MANUALES!=="undefined" ? ENTES_PERMANENTES_MANUALES : []).map(_norm);
+  const permanentes = Object.keys(enteAnios).filter(e =>
+    (totalAnios>0 && enteAniosTodos[e].size === totalAnios) || manuales.includes(_norm(e)));
   permanentes.sort();
   const totalEntes = Object.keys(enteAnios).length;
   const pctPerm = totalEntes>0 ? Math.round(permanentes.length/totalEntes*100) : 0;
@@ -293,7 +296,7 @@ function renderTopEntes(d){
   });
 
   let html = `<div class="perm-intro">
-    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> registrados. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
+    Son los entes que han sido <b>auditados en cada uno de los ${totalAnios} ejercicios fiscales</b> registrados, más los que la UEC incluye por decisión institucional por su continuidad reciente. Por su <b>importancia presupuestal, naturaleza jurídica o impacto institucional</b>, ingresan al programa de fiscalización <b>todos los años sin excepción</b>.
   </div>
   <div class="perm-stats">
     <div class="perm-stat"><div class="n">${permanentes.length}</div><div class="l">Entes permanentes</div></div>
