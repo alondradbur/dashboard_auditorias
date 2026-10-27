@@ -79,4 +79,16 @@ async function iniciarAplicacion() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", iniciarAplicacion);
+document.addEventListener("DOMContentLoaded", () => {
+  iniciarAplicacion();
+  const btn = document.getElementById("btn-actualizar");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      btn.classList.add("loading");
+      btn.querySelector(".txt").textContent = "Actualizando…";
+      // Recarga completa: vuelve a leer la hoja y reconstruye filtros y gráficas
+      window.location.reload();
+    });
+  }
+});

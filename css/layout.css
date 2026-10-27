@@ -284,3 +284,10 @@
   margin-bottom:4px;
   font-weight:700;
 }
+
+  header .refresh-btn{width:130px;height:88px;box-sizing:border-box;background:#6b1f2a;color:#fff;border:1px solid #4a1019;border-radius:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;font-size:13px;font-weight:bold;}
+  header .refresh-btn .ico{font-size:24px;line-height:1;}
+  header .refresh-btn:hover{background:#8a2a38;}
+  header .refresh-btn:disabled{opacity:.7;cursor:wait;}
+  header .refresh-btn.loading .ico{display:inline-block;animation:giro 1s linear infinite;}
+  @keyframes giro{to{transform:rotate(360deg);}}

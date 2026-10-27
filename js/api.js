@@ -7,7 +7,9 @@
 let ULTIMA_ACTUALIZACION = null;
 
 async function cargarDatosDesdeAppsScript() {
-  const respuesta = await fetch(APPS_SCRIPT_URL);
+  // Parámetro único + no-store: evita que el navegador reutilice una respuesta vieja
+  const sep = APPS_SCRIPT_URL.includes("?") ? "&" : "?";
+  const respuesta = await fetch(`${APPS_SCRIPT_URL}${sep}_=${Date.now()}`, { cache: "no-store" });
 
   if (!respuesta.ok) {
     throw new Error("No se pudo conectar con Google Sheets.");
