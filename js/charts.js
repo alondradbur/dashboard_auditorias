@@ -728,10 +728,16 @@ function toggleDetail(idx){
 }
 
 
+// Número de entes auditados, sin contar los que solo tuvieron auditoría de desempeño
+function contarEntes(registros){
+  const soloDesempeno = r => (r.desempeno>0) && !(r.cygf>0) && !(r.obra>0);
+  return new Set(registros.filter(r=>!soloDesempeno(r)).map(r=>r.entidad)).size;
+}
+
 function renderMultianual(){
   // ignora filtros - siempre muestra los 5 años completos
   const anios = unique(RAW_DATA.map(r=>r.anio).filter(x=>x)).sort();
-  const auds = anios.map(a=>RAW_DATA.filter(r=>r.anio===a).length);
+  const auds = anios.map(a=>contarEntes(RAW_DATA.filter(r=>r.anio===a)));
   const aprobs = anios.map(a=>RAW_DATA.filter(r=>r.anio===a && r.dictamen==="Se Aprueba").length);
   const pctNoSolv = anios.map(a=>{
     const sub = RAW_DATA.filter(r=>r.anio===a);
@@ -743,7 +749,7 @@ function renderMultianual(){
   charts.multi = new Chart(document.getElementById("ch-multianual"), {
     type:"line",
     data:{labels:anios, datasets:[
-      {label:"# Auditorías", data:auds, borderColor:PALETTE.primary, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5, datalabels:{align:"top", color:PALETTE.primary, formatter:v=>fmtN(v)}},
+      {label:"# Entes", data:auds, borderColor:PALETTE.primary, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5, datalabels:{align:"top", color:PALETTE.primary, formatter:v=>fmtN(v)}},
       {label:"# Dictámenes Aprobados", data:aprobs, borderColor:PALETTE.good, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5, datalabels:{align:"bottom", color:PALETTE.good, formatter:v=>fmtN(v)}},
       {label:"% Obs. No Solventadas", data:pctNoSolv, borderColor:PALETTE.bad, backgroundColor:"transparent", yAxisID:"y1", tension:.3, borderWidth:3, pointRadius:5, borderDash:[6,3], datalabels:{align:"top", color:PALETTE.bad, formatter:v=>(Math.round(v*10)/10).toLocaleString("es-MX")}}
     ]},
@@ -759,9 +765,7 @@ function renderMultianual(){
   let prev = null;
   const rows = anios.map(a=>{
     const sub = RAW_DATA.filter(r=>r.anio===a);
-    // Entes CyGF: entes distintos auditados, sin contar los que solo tuvieron auditoría de desempeño
-    const soloDesempeno = r => (r.desempeno>0) && !(r.cygf>0) && !(r.obra>0);
-    const total = new Set(sub.filter(r=>!soloDesempeno(r)).map(r=>r.entidad)).size;
+    const total = contarEntes(sub);
     const aprob = sub.filter(r=>r.dictamen==="Se Aprueba").length;
     const noaprob = sub.filter(r=>r.dictamen==="No se aprueba").length;
     const denom = aprob+noaprob;

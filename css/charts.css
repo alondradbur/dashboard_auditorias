@@ -2,3 +2,5 @@
    GRÁFICAS
    Los estilos principales heredados del dashboard original están en layout.css.
 ============================================================ */
+
+.nota-entes{font-size:12px;color:#6b4f06;font-style:italic;margin-top:8px;}

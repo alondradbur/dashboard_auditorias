@@ -30,15 +30,15 @@
   <meta name="twitter:description" content="Unidad de Evaluación y Control de la CVASEBCS">
   <meta name="twitter:image" content="assets/og-image.png">
 
-  <link rel="stylesheet" href="css/reset.css?v=202610271311">
-  <link rel="stylesheet" href="css/variables.css?v=202610271311">
-  <link rel="stylesheet" href="css/layout.css?v=202610271311">
-  <link rel="stylesheet" href="css/sidebar.css?v=202610271311">
-  <link rel="stylesheet" href="css/header.css?v=202610271311">
-  <link rel="stylesheet" href="css/cards.css?v=202610271311">
-  <link rel="stylesheet" href="css/charts.css?v=202610271311">
-  <link rel="stylesheet" href="css/tables.css?v=202610271311">
-  <link rel="stylesheet" href="css/responsive.css?v=202610271311">
+  <link rel="stylesheet" href="css/reset.css?v=202610271313">
+  <link rel="stylesheet" href="css/variables.css?v=202610271313">
+  <link rel="stylesheet" href="css/layout.css?v=202610271313">
+  <link rel="stylesheet" href="css/sidebar.css?v=202610271313">
+  <link rel="stylesheet" href="css/header.css?v=202610271313">
+  <link rel="stylesheet" href="css/cards.css?v=202610271313">
+  <link rel="stylesheet" href="css/charts.css?v=202610271313">
+  <link rel="stylesheet" href="css/tables.css?v=202610271313">
+  <link rel="stylesheet" href="css/responsive.css?v=202610271313">
 </head>
 <body class="locked">
 <div class="login-overlay" id="loginOverlay">
@@ -200,6 +200,7 @@
         <tbody></tbody>
       </table>
     </div>
+    <div class="nota-entes">* # Entes: no incluye a los entes auditados únicamente en materia de desempeño.</div>
   </div>
 </section>
 
@@ -323,8 +324,9 @@
 <section class="block">
   <h2>8. Comparativo Multianual (2020 - 2024)</h2>
   <div class="chart-card">
-    <h3>Evolución de auditorías, dictámenes aprobados y % no solventado</h3>
+    <h3>Evolución de entes auditados, dictámenes aprobados y % no solventado</h3>
     <div class="chart-wrap tall"><canvas id="ch-multianual"></canvas></div>
+    <div class="nota-entes">* # Entes: no incluye a los entes auditados únicamente en materia de desempeño.</div>
   </div>
   <div class="chart-card" style="margin-top:16px;">
     <h3>Tabla resumen anual</h3>
@@ -332,7 +334,7 @@
       <table class="data" id="tbl-multianual">
         <thead><tr>
           <th>Año</th>
-          <th># Entes CyGF</th>
+          <th># Entes*</th>
           <th>Variación</th>
           <th># Aprobadas</th>
           <th>% Aprobación</th>
@@ -371,16 +373,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 
-<script src="js/config.js?v=202610271311"></script>
-<script src="js/utils.js?v=202610271311"></script>
-<script src="js/auth.js?v=202610271311"></script>
-<script src="js/api.js?v=202610271311"></script>
-<script src="js/filters.js?v=202610271311"></script>
-<script src="js/kpis.js?v=202610271311"></script>
-<script src="js/charts.js?v=202610271311"></script>
-<script src="js/table.js?v=202610271311"></script>
-<script src="js/sections.js?v=202610271311"></script>
-<script src="js/app.js?v=202610271311"></script>
+<script src="js/config.js?v=202610271313"></script>
+<script src="js/utils.js?v=202610271313"></script>
+<script src="js/auth.js?v=202610271313"></script>
+<script src="js/api.js?v=202610271313"></script>
+<script src="js/filters.js?v=202610271313"></script>
+<script src="js/kpis.js?v=202610271313"></script>
+<script src="js/charts.js?v=202610271313"></script>
+<script src="js/table.js?v=202610271313"></script>
+<script src="js/sections.js?v=202610271313"></script>
+<script src="js/app.js?v=202610271313"></script>
 
 </body>
 </html>
