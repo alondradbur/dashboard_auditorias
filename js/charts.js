@@ -759,7 +759,9 @@ function renderMultianual(){
   let prev = null;
   const rows = anios.map(a=>{
     const sub = RAW_DATA.filter(r=>r.anio===a);
-    const total = sub.length;
+    // Entes CyGF: entes distintos auditados, sin contar los que solo tuvieron auditoría de desempeño
+    const soloDesempeno = r => (r.desempeno>0) && !(r.cygf>0) && !(r.obra>0);
+    const total = new Set(sub.filter(r=>!soloDesempeno(r)).map(r=>r.entidad)).size;
     const aprob = sub.filter(r=>r.dictamen==="Se Aprueba").length;
     const noaprob = sub.filter(r=>r.dictamen==="No se aprueba").length;
     const denom = aprob+noaprob;
