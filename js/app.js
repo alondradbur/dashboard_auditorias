@@ -56,7 +56,22 @@ function actualizarFooterMeta() {
 }
 
 
+function actualizarTarjetasEncabezado() {
+  const anios = Array.from(new Set(RAW_DATA.map(r => r.anio).filter(x => x))).sort();
+  const a = document.getElementById("hdr-auditorias");
+  const e = document.getElementById("hdr-ejercicios");
+  if (a) a.textContent = RAW_DATA.length;
+  if (e) e.textContent = anios.length;
+  const sub = document.getElementById("hdr-periodo");
+  if (sub && anios.length) {
+    sub.textContent = anios.length > 1
+      ? `Resumen de Auditorías ${anios[0]} — ${anios[anios.length - 1]}`
+      : `Resumen de Auditorías ${anios[0]}`;
+  }
+}
+
 function inicializarDashboardAuditorias() {
+  actualizarTarjetasEncabezado();
   populateFilters();
   bindFilterEvents();
   renderAll();
