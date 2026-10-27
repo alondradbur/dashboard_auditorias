@@ -276,8 +276,10 @@ function renderTopEntes(d){
   // Permanentes = entes de la selección que han sido auditados en todos los años de la base
   const _norm = t => String(t||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const manuales = (typeof ENTES_PERMANENTES_MANUALES!=="undefined" ? ENTES_PERMANENTES_MANUALES : []).map(_norm);
+  const excluidos = (typeof ENTES_PERMANENTES_EXCLUIDOS!=="undefined" ? ENTES_PERMANENTES_EXCLUIDOS : []).map(_norm);
   const permanentes = Object.keys(enteAnios).filter(e =>
-    (totalAnios>0 && enteAniosTodos[e].size === totalAnios) || manuales.includes(_norm(e)));
+    !excluidos.includes(_norm(e)) &&
+    ((totalAnios>0 && enteAniosTodos[e].size === totalAnios) || manuales.includes(_norm(e))));
   permanentes.sort();
   const totalEntes = Object.keys(enteAnios).length;
   const pctPerm = totalEntes>0 ? Math.round(permanentes.length/totalEntes*100) : 0;

@@ -13,3 +13,10 @@ const ENTES_PERMANENTES_MANUALES = [
   "Municipo de Loreto",
   "Municipio de Loreto"   // por si se corrige la ortografía en la hoja
 ];
+
+// Entes que NO se muestran en la tarjeta "Entes auditados de manera permanente",
+// aunque cumplan la regla automática (auditados en todos los años).
+// Escribe el nombre tal como aparece en la columna ENTIDAD de la hoja.
+const ENTES_PERMANENTES_EXCLUIDOS = [
+  "Instituto Estatal Electoral de Baja California Sur"
+];
