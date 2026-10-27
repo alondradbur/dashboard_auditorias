@@ -24,6 +24,6 @@ const ENTES_PERMANENTES_EXCLUIDOS = [
 // Notas que se muestran junto al nombre del ente en la tarjeta de entes permanentes.
 // El ente aparece con un * y la nota debajo. Escribe el nombre tal como está en la hoja.
 const ENTES_PERMANENTES_NOTAS = {
-  "Municipo de Loreto": "*Excepto 2022",
-  "Municipio de Loreto": "*Excepto 2022"
+  "Municipo de Loreto": "*Excepto 2021",
+  "Municipio de Loreto": "*Excepto 2021"
 };
