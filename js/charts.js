@@ -734,12 +734,12 @@ function renderMultianual(){
   charts.multi = new Chart(document.getElementById("ch-multianual"), {
     type:"line",
     data:{labels:anios, datasets:[
-      {label:"# Auditorías", data:auds, borderColor:PALETTE.primary, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5},
-      {label:"# Dictámenes Aprobados", data:aprobs, borderColor:PALETTE.good, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5},
-      {label:"% Obs. No Solventadas", data:pctNoSolv, borderColor:PALETTE.bad, backgroundColor:"transparent", yAxisID:"y1", tension:.3, borderWidth:3, pointRadius:5, borderDash:[6,3]}
+      {label:"# Auditorías", data:auds, borderColor:PALETTE.primary, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5, datalabels:{align:"top", color:PALETTE.primary, formatter:v=>fmtN(v)}},
+      {label:"# Dictámenes Aprobados", data:aprobs, borderColor:PALETTE.good, backgroundColor:"transparent", yAxisID:"y", tension:.3, borderWidth:3, pointRadius:5, datalabels:{align:"bottom", color:PALETTE.good, formatter:v=>fmtN(v)}},
+      {label:"% Obs. No Solventadas", data:pctNoSolv, borderColor:PALETTE.bad, backgroundColor:"transparent", yAxisID:"y1", tension:.3, borderWidth:3, pointRadius:5, borderDash:[6,3], datalabels:{align:"top", color:PALETTE.bad, formatter:v=>(Math.round(v*10)/10).toLocaleString("es-MX")}}
     ]},
     options:{responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:"bottom"}, datalabels:{display:false}},
+      plugins:{legend:{position:"bottom"}, datalabels:{display:true, font:{weight:"bold", size:12}, offset:6, clip:false}},
       scales:{
         y:{beginAtZero:true, position:"left", title:{display:true, text:"Cantidad"}},
         y1:{beginAtZero:true, position:"right", max:100, grid:{drawOnChartArea:false}, title:{display:true, text:"%"}}
