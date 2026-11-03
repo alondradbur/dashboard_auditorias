@@ -52,9 +52,9 @@ const ESTATUS_EQUIVALENTES_PROCEDIMIENTOS = {
 // Significado de las claves de la columna UBICACIÓN.
 // Si una clave no está aquí, se muestra tal cual aparece en la hoja.
 const UBICACIONES_PROCEDIMIENTOS = {
-  "OIC": "OIC",
-  "CM": "CM",
-  "CG": "CG",
-  "ASEBCS": "ASEBCS",
-  "TJABCS": "TJABCS"
+  "OIC": "Órgano Interno de Control (OIC)",
+  "CM": "Contraloría Municipal (CM)",
+  "CG": "Contraloría General (CG)",
+  "ASEBCS": "Auditoría Superior (ASEBCS)",
+  "TJABCS": "Tribunal de Justicia Administrativa (TJABCS)"
 };
