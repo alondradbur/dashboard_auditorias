@@ -30,15 +30,15 @@
   <meta name="twitter:description" content="Unidad de Evaluación y Control de la CVASEBCS">
   <meta name="twitter:image" content="assets/og-image.png">
 
-  <link rel="stylesheet" href="css/reset.css?v=202610271317">
-  <link rel="stylesheet" href="css/variables.css?v=202610271317">
-  <link rel="stylesheet" href="css/layout.css?v=202610271317">
-  <link rel="stylesheet" href="css/sidebar.css?v=202610271317">
-  <link rel="stylesheet" href="css/header.css?v=202610271317">
-  <link rel="stylesheet" href="css/cards.css?v=202610271317">
-  <link rel="stylesheet" href="css/charts.css?v=202610271317">
-  <link rel="stylesheet" href="css/tables.css?v=202610271317">
-  <link rel="stylesheet" href="css/responsive.css?v=202610271317">
+  <link rel="stylesheet" href="css/reset.css?v=202611031030">
+  <link rel="stylesheet" href="css/variables.css?v=202611031030">
+  <link rel="stylesheet" href="css/layout.css?v=202611031030">
+  <link rel="stylesheet" href="css/sidebar.css?v=202611031030">
+  <link rel="stylesheet" href="css/header.css?v=202611031030">
+  <link rel="stylesheet" href="css/cards.css?v=202611031030">
+  <link rel="stylesheet" href="css/charts.css?v=202611031030">
+  <link rel="stylesheet" href="css/tables.css?v=202611031030">
+  <link rel="stylesheet" href="css/responsive.css?v=202611031030">
 </head>
 <body class="locked">
 <div class="login-overlay" id="loginOverlay">
@@ -79,13 +79,16 @@
       <div class="num" id="hdr-ejercicios">--</div>
       <div class="lbl">Ejercicios fiscales auditados</div>
     </div>
+    <button type="button" id="btn-pj" class="refresh-btn pj-btn" title="Ver los procedimientos jurídicos (CONSOLIDADO DE FALTAS)">
+      <span class="ico">⚖</span><span class="txt">Procedimientos Jurídicos</span>
+    </button>
     <button type="button" id="btn-actualizar" class="refresh-btn" title="Volver a leer los datos de Google Sheets">
       <span class="ico">⟳</span><span class="txt">Actualizar datos</span>
     </button>
   </div>
 </header>
 
-<main>
+<main id="vista-auditorias">
 
 
 
@@ -354,6 +357,74 @@
 
 </main>
 
+<!-- ============================================================ -->
+<!-- VISTA: PROCEDIMIENTOS JURÍDICOS (se abre con el botón del encabezado) -->
+<!-- ============================================================ -->
+<main id="vista-pj" hidden>
+
+  <div class="filters">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="f-pj-anio">Cuenta pública</label>
+        <select id="f-pj-anio"><option value="">Todas</option></select>
+      </div>
+      <div class="filter-group pj-fuente-wrap"><span id="pj-fuente" class="pj-fuente"></span></div>
+    </div>
+  </div>
+
+  <div id="pj-mensaje" class="pj-mensaje" hidden></div>
+
+  <div id="pj-contenido">
+    <div class="kpis" id="pj-kpis"></div>
+
+    <section class="block">
+      <h2>Evolución por cuenta pública y gravedad</h2>
+      <div class="chart-card">
+        <h3>Expedientes radicados por cuenta pública (siempre muestra todos los años)</h3>
+        <div class="chart-wrap"><canvas id="pj-ch-anio"></canvas></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Dónde está cada expediente</h2>
+      <div class="chart-card">
+        <h3>Expedientes por ubicación y tipo de falta</h3>
+        <div class="chart-wrap"><canvas id="pj-ch-ubicacion"></canvas></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Estatus actual de los expedientes</h2>
+      <div class="grid-2">
+        <div class="chart-card">
+          <h3>Expedientes por estatus</h3>
+          <div class="chart-wrap"><canvas id="pj-ch-estatus"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Estatus por cuenta pública</h3>
+          <div class="chart-wrap"><canvas id="pj-ch-estatus-anio"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Entes con más expedientes</h2>
+      <div class="chart-card">
+        <h3>12 entes con más expedientes radicados, por cuenta pública</h3>
+        <div class="table-wrap" style="max-height:none;"><table class="data" id="pj-heat"></table></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Casos con avance judicial y entes sin respuesta</h2>
+      <h3 class="pj-sub">Casos con resolución o en instancia judicial</h3>
+      <div class="pj-casos" id="pj-casos"></div>
+      <h3 class="pj-sub">Entes con la nota «Sin respuesta del ente»</h3>
+      <div class="pj-chips" id="pj-sinresp"></div>
+    </section>
+  </div>
+</main>
+
 <footer>
   <div class="footer-grid">
     <img src="assets/logo.png" alt="UEC ASE - BCS" onerror="this.style.display='none'">
@@ -373,16 +444,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 
-<script src="js/config.js?v=202610271317"></script>
-<script src="js/utils.js?v=202610271317"></script>
-<script src="js/auth.js?v=202610271317"></script>
-<script src="js/api.js?v=202610271317"></script>
-<script src="js/filters.js?v=202610271317"></script>
-<script src="js/kpis.js?v=202610271317"></script>
-<script src="js/charts.js?v=202610271317"></script>
-<script src="js/table.js?v=202610271317"></script>
-<script src="js/sections.js?v=202610271317"></script>
-<script src="js/app.js?v=202610271317"></script>
+<script src="js/config.js?v=202611031030"></script>
+<script src="js/utils.js?v=202611031030"></script>
+<script src="js/auth.js?v=202611031030"></script>
+<script src="js/api.js?v=202611031030"></script>
+<script src="js/filters.js?v=202611031030"></script>
+<script src="js/kpis.js?v=202611031030"></script>
+<script src="js/charts.js?v=202611031030"></script>
+<script src="js/table.js?v=202611031030"></script>
+<script src="js/sections.js?v=202611031030"></script>
+<script src="js/procedimientos.js?v=202611031030"></script>
+<script src="js/app.js?v=202611031030"></script>
 
 </body>
 </html>

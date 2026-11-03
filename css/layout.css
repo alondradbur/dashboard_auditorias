@@ -291,3 +291,25 @@
   header .refresh-btn:disabled{opacity:.7;cursor:wait;}
   header .refresh-btn.loading .ico{display:inline-block;animation:giro 1s linear infinite;}
   @keyframes giro{to{transform:rotate(360deg);}}
+
+/* ============================================================
+   PROCEDIMIENTOS JURÍDICOS
+============================================================ */
+header .pj-btn{background:#faf6ec;color:#6b1f2a;border:1px solid #d4a437;}
+header .pj-btn:hover{background:#f1e7c9;}
+header .pj-btn .txt{text-align:center;line-height:1.15;padding:0 6px;}
+.pj-fuente-wrap{display:flex;align-items:flex-end;}
+.pj-fuente{font-size:12px;color:var(--neutral);}
+.pj-mensaje{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:6px;padding:14px 16px;margin-bottom:18px;box-shadow:var(--shadow);}
+.pj-mensaje p{margin:0;}
+.pj-sub{font-size:14px;color:var(--ink);margin:6px 0 8px 0;}
+.pj-casos{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:14px;}
+.pj-caso{background:#fafaf6;border:1px solid var(--line);border-left:4px solid var(--neutral);border-radius:5px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.pj-caso.ok{border-left-color:var(--good);} .pj-caso.pen{border-left-color:var(--bad);} .pj-caso.jud{border-left-color:var(--warn);}
+.pj-caso .y{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);font-weight:bold;}
+.pj-caso .e{font-weight:bold;overflow-wrap:anywhere;}
+.pj-caso .d{color:var(--ink-soft);font-size:13px;overflow-wrap:anywhere;}
+.pj-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.pj-chip{font-size:12px;border:1px solid var(--line);background:#fafaf6;border-radius:999px;padding:3px 10px;color:var(--ink-soft);}
+.pj-vacio{color:var(--neutral);margin:0;}
+@media(max-width:700px){header .pj-btn{width:auto;flex:1 1 45%;height:auto;min-height:60px;padding:6px;}}

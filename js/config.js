@@ -27,3 +27,29 @@ const ENTES_PERMANENTES_NOTAS = {
   "Municipo de Loreto": "*Excepto 2021",
   "Municipio de Loreto": "*Excepto 2021"
 };
+
+/* ============================================================
+   PROCEDIMIENTOS JURÍDICOS
+   Hoja de Google Sheets que alimenta el apartado (debe estar permitida en el Apps Script).
+============================================================ */
+const HOJA_PROCEDIMIENTOS = "CONSOLIDADO DE FALTAS";
+
+// Significado de las claves de la columna ESTATUS ACTUAL.
+// Si agregas una clave nueva en la hoja, agrégala aquí; si falta, se muestra "Estatus X".
+const ESTATUS_PROCEDIMIENTOS = {
+  "I": "Investigación en trámite",
+  "S": "Substanciación",
+  "C": "Conclusión",
+  "P": "Prescrito",
+  "O": "Otro"
+};
+
+// Significado de las claves de la columna UBICACIÓN.
+// Si una clave no está aquí, se muestra tal cual aparece en la hoja.
+const UBICACIONES_PROCEDIMIENTOS = {
+  "OIC": "OIC",
+  "CM": "CM",
+  "CG": "CG",
+  "ASEBCS": "ASEBCS",
+  "TJABCS": "TJABCS"
+};
