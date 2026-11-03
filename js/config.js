@@ -39,9 +39,14 @@ const HOJA_PROCEDIMIENTOS = "CONSOLIDADO DE FALTAS";
 const ESTATUS_PROCEDIMIENTOS = {
   "I": "Investigación en trámite",
   "S": "Substanciación",
-  "C": "Conclusión",
+  "C": "Conclusión (incluye Resuelto)",
   "P": "Prescrito",
   "O": "Otro"
+};
+
+// Claves que significan lo mismo y se cuentan juntas. "R" (Resuelto) se cuenta como "C" (Conclusión).
+const ESTATUS_EQUIVALENTES_PROCEDIMIENTOS = {
+  "R": "C"
 };
 
 // Significado de las claves de la columna UBICACIÓN.

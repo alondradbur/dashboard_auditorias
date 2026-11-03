@@ -39,6 +39,10 @@ async function pjCargarHoja() {
   return filas;
 }
 
+function pjUnificarEstatus(clave) {
+  return ESTATUS_EQUIVALENTES_PROCEDIMIENTOS[clave] || clave;
+}
+
 function pjNormalizar(filas) {
   return filas.map(f => ({
     anio: limpiarTexto(obtenerValor(f, ["cuenta_publica"])),
@@ -46,7 +50,7 @@ function pjNormalizar(filas) {
     tipo: limpiarTexto(obtenerValor(f, ["tipo_de_falta"])),
     articulo: limpiarTexto(obtenerValor(f, ["tipo_de_falta_art_lraembcs"])),
     exp: convertirEntero(obtenerValor(f, ["numero_de_expedientes_radicados"], 0)),
-    estatus: limpiarTexto(obtenerValor(f, ["estatus_actual"])).toUpperCase(),
+    estatus: pjUnificarEstatus(limpiarTexto(obtenerValor(f, ["estatus_actual"])).toUpperCase()),
     ubicacion: limpiarTexto(obtenerValor(f, ["ubicacion"])),
     detalle: limpiarTexto(obtenerValor(f, ["detalle_breve"]))
   })).filter(r => r.ente && r.anio);
