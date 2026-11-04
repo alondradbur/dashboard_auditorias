@@ -8,11 +8,40 @@
 ============================================================ */
 
 const PJ_HASH = "#procedimientos-juridicos";
+// Tonos medios/claros de la misma familia (ámbar, terracota, topo) para que las
+// etiquetas negras en negritas se lean sobre cualquier barra.
 const PJ_COLORES = {
-  noGrave: "#c8923b", grave: "#a14a3a", penal: "#5c4a4a", guinda: "#6b1f2a",
+  noGrave: "#f2c879", grave: "#e59a8a", penal: "#b7a6a6", guinda: "#6b1f2a",
   buena: "#3f7a4f", neutro: "#7a8693", acento: "#c4a08a"
 };
-const PJ_COLORES_ESTATUS = ["#6b1f2a", "#3f7a4f", "#c8923b", "#5c4a4a", "#7a8693", "#c4a08a", "#a14a3a"];
+// Un color fijo por clave de estatus, igual en las dos gráficas de estatus.
+const PJ_COLOR_POR_ESTATUS = {
+  I: "#e0a63a",   // Investigación en trámite (ámbar)
+  S: "#6b1f2a",   // Substanciación (guinda)
+  C: "#3f7a4f",   // Conclusión (verde)
+  P: "#7a8693",   // Prescrito (gris azulado)
+  O: "#d9c3a5"    // Otro (arena)
+};
+const PJ_COLORES_ESTATUS_RESPALDO = ["#4a4a4a", "#a14a3a", "#9bb5a3", "#c4a08a"];
+
+// Elige negro o blanco, el que dé más contraste sobre el color de fondo.
+function pjTextoSobre(hex) {
+  const n = parseInt(String(hex).replace("#", ""), 16);
+  const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const L = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  return L > 0.179 ? "#000000" : "#ffffff";
+}
+
+// Parte un texto largo en varias líneas para las etiquetas de los ejes.
+function pjEnvolver(texto, max) {
+  const lineas = []; let actual = "";
+  String(texto).split(" ").forEach(p => {
+    if (actual && (actual + " " + p).length > max) { lineas.push(actual); actual = p; }
+    else actual = actual ? actual + " " + p : p;
+  });
+  if (actual) lineas.push(actual);
+  return lineas;
+}
 
 let PJ_DATOS = null;          // registros normalizados
 let PJ_CARGANDO = false;
@@ -122,10 +151,37 @@ function pjCrear(id, config) {
 
 function pjEjes(apilado) {
   return {
-    x: { stacked: apilado, grid: { color: "#e6e4dd" } },
-    y: { stacked: apilado, grid: { color: "#e6e4dd" }, beginAtZero: true, ticks: { precision: 0 } }
+    x: { stacked: apilado, grid: { display: false }, ticks: { font: { size: 12 }, maxRotation: 0 } },
+    y: { stacked: apilado, grid: { color: "#e6e4dd" }, beginAtZero: true, ticks: { precision: 0, font: { size: 12 } } }
   };
 }
+
+// ¿Cabe la etiqueta dentro del segmento? Si el segmento es muy pequeño se oculta
+// (el dato sigue disponible al pasar el cursor) para que nunca se encimen textos.
+function pjCabe(ctx, horizontal, minimo) {
+  if (!ctx.dataset.data[ctx.dataIndex]) return false;
+  const el = ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.dataIndex];
+  if (!el) return false;
+  // Posición final (no la de la animación en curso)
+  const p = el.getProps(["x", "y", "base"], true);
+  const tam = horizontal ? Math.abs(p.x - p.base) : Math.abs(p.y - p.base);
+  return tam >= minimo;
+}
+
+// Etiqueta de datos para barras apiladas. colorFijo: fuerza un color (p. ej. negro);
+// sin él, se elige negro o blanco según el fondo de cada barra.
+function pjEtiquetaBarra(horizontal, colorFijo) {
+  return {
+    anchor: "center", align: "center", clamp: true,
+    color: ctx => colorFijo || pjTextoSobre(ctx.dataset.backgroundColor),
+    font: { weight: "bold", size: 12 },
+    formatter: v => pjFmt(v),
+    display: ctx => pjCabe(ctx, horizontal, horizontal ? 24 : 16)
+  };
+}
+
+// Estilo común de las barras: sin bordes desfasados y con grosor uniforme.
+const PJ_BARRA = { borderWidth: 1, borderColor: "#ffffff", borderSkipped: false, maxBarThickness: 64, categoryPercentage: 0.8, barPercentage: 0.9 };
 
 function pjRender() {
   if (!PJ_DATOS) return;
@@ -145,27 +201,39 @@ function pjRender() {
     <div class="kpi k2"><div class="label">Denuncias penales</div><div class="value">${pjFmt(c.totPenal)}</div><div class="sub">${pct(c.totPenal)}</div></div>
     <div class="kpi k3"><div class="label">Entes con expedientes</div><div class="value">${pjFmt(c.entes)}</div><div class="sub">entes únicos</div></div>`;
 
-  const base = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } };
+  const leyenda = { position: "bottom", labels: { boxWidth: 14, boxHeight: 14, padding: 14, font: { size: 12 } } };
+  const base = { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 8, right: 14, bottom: 4, left: 4 } }, plugins: { legend: leyenda } };
 
+  // 1) Evolución por cuenta pública y gravedad — etiquetas negras en negritas
   pjCrear("pj-ch-anio", { type: "bar", data: { labels: todo.anios, datasets: [
-    { label: "No grave", data: todo.porAnioTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave },
-    { label: "Grave", data: todo.porAnioTipo["Grave"], backgroundColor: PJ_COLORES.grave },
-    { label: "Denuncia penal", data: todo.porAnioTipo["Denuncia Penal"], backgroundColor: PJ_COLORES.penal }] },
-    options: { ...base, scales: pjEjes(true) } });
+    { label: "No grave", data: todo.porAnioTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA },
+    { label: "Grave", data: todo.porAnioTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA },
+    { label: "Denuncia penal", data: todo.porAnioTipo["Denuncia Penal"], backgroundColor: PJ_COLORES.penal, ...PJ_BARRA }] },
+    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false, "#000000") } } });
 
+  // 2) Ubicación del Expediente — etiquetas negras en negritas, nombres de ubicación en varias líneas
   pjCrear("pj-ch-ubicacion", { type: "bar", data: { labels: c.ubicaciones.map(pjNombreUbicacion), datasets: [
-    { label: "No grave", data: c.porUbicacionTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave },
-    { label: "Grave", data: c.porUbicacionTipo["Grave"], backgroundColor: PJ_COLORES.grave }] },
-    options: { ...base, indexAxis: "y", scales: pjEjes(true) } });
+    { label: "No grave", data: c.porUbicacionTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA, maxBarThickness: 38 },
+    { label: "Grave", data: c.porUbicacionTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA, maxBarThickness: 38 }] },
+    options: { ...base, indexAxis: "y", scales: {
+      x: { stacked: true, beginAtZero: true, grid: { color: "#e6e4dd" }, ticks: { precision: 0, font: { size: 12 } } },
+      y: { stacked: true, grid: { display: false }, ticks: { autoSkip: false, font: { size: 12 }, callback(v) { return pjEnvolver(this.getLabelForValue(v), 24); } } }
+    }, plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(true, "#000000") } } });
 
-  const colorEst = (k, i) => PJ_COLORES_ESTATUS[i % PJ_COLORES_ESTATUS.length];
+  // 3) Estatus: un color fijo por clave y texto negro o blanco según el fondo
+  const colorEst = (k, i) => PJ_COLOR_POR_ESTATUS[k] || PJ_COLORES_ESTATUS_RESPALDO[i % PJ_COLORES_ESTATUS_RESPALDO.length];
   pjCrear("pj-ch-estatus", { type: "doughnut", data: { labels: c.claves.map(pjNombreEstatus), datasets: [
-    { data: c.claves.map(k => c.totalEst[k]), backgroundColor: c.claves.map(colorEst), borderColor: "#fff", borderWidth: 2 }] },
-    options: { ...base, cutout: "58%" } });
+    { data: c.claves.map(k => c.totalEst[k]), backgroundColor: c.claves.map(colorEst), borderColor: "#ffffff", borderWidth: 2 }] },
+    options: { ...base, cutout: "48%", plugins: { ...base.plugins, datalabels: {
+      color: ctx => pjTextoSobre(ctx.dataset.backgroundColor[ctx.dataIndex]),
+      font: { weight: "bold", size: 13 },
+      formatter: v => pjFmt(v),
+      display: ctx => { const t = ctx.dataset.data.reduce((s, x) => s + x, 0); const v = ctx.dataset.data[ctx.dataIndex]; return t > 0 && v / t >= 0.04; }
+    } } } });
 
   pjCrear("pj-ch-estatus-anio", { type: "bar", data: { labels: c.anios, datasets: c.claves.map((k, i) => (
-    { label: pjNombreEstatus(k), data: c.estatusPorAnio[k], backgroundColor: colorEst(k, i) })) },
-    options: { ...base, scales: pjEjes(true) } });
+    { label: pjNombreEstatus(k), data: c.estatusPorAnio[k], backgroundColor: colorEst(k, i), ...PJ_BARRA })) },
+    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false) } } });
 
   const max = Math.max(1, ...c.topEntes.flatMap(t => t[1]));
   pjEl("pj-heat").innerHTML = `<thead><tr><th>Ente fiscalizable</th>${c.anios.map(a => `<th style="text-align:right">${a}</th>`).join("")}<th style="text-align:right">Total</th></tr></thead><tbody>` +

@@ -313,3 +313,11 @@ header .pj-btn .txt{text-align:center;line-height:1.15;padding:0 6px;}
 .pj-chip{font-size:12px;border:1px solid var(--line);background:#fafaf6;border-radius:999px;padding:3px 10px;color:var(--ink-soft);}
 .pj-vacio{color:var(--neutral);margin:0;}
 @media(max-width:700px){header .pj-btn{width:auto;flex:1 1 45%;height:auto;min-height:60px;padding:6px;}}
+
+/* Gráficas de Procedimientos Jurídicos: más altas para que las etiquetas no se encimen */
+#vista-pj .chart-wrap{height:340px;}
+#vista-pj .grid-2 .chart-wrap{height:400px;}
+@media(max-width:700px){
+  #vista-pj .chart-wrap{height:320px;}
+  #vista-pj .grid-2 .chart-wrap{height:360px;}
+}
