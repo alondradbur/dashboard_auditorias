@@ -58,10 +58,19 @@ const fmtMoney = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'
 const fmtMoneyAxis = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct = n => (Math.round(n*10)/10) + "%";
 // Montos por registro: incluyen Cumplimiento + Egresos + Obra Pública + Ingresos + Presupuestales
-const montoFincado = r => (r.cumpl_fincado||0)+r.egresos_fincado+r.obra_fincado+r.ingresos_fincado+r.presup_fincado;
-const montoSolv    = r => (r.cumpl_solv||0)+r.egresos_solv+r.obra_solv+r.ingresos_solv+r.presup_solv;
-const montoNoSolv  = r => (r.cumpl_no_solv||0)+r.egresos_no_solv+r.obra_no_solv+r.ingresos_no_solv+r.presup_no_solv;
+// Se usa la columna TOTAL de la hoja (TOTAL FINCADO / SOLVENTADOS / NO SOLVENTADOS) para que
+// coincida con Drive; api.js la calcula como suma de componentes solo si la hoja la trae vacía.
+const montoFincado = r => r.total_fincado  || 0;
+const montoSolv    = r => r.total_solv     || 0;
+const montoNoSolv  = r => r.total_no_solv  || 0;
 
+
+function normalizarEnte(t){
+  return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLowerCase();
+}
+function hayEnteExacto(buscado){
+  return RAW_DATA.some(r=>normalizarEnte(r.entidad) === buscado);
+}
 
 function getFiltered(){
   return RAW_DATA.filter(r=>{
@@ -69,7 +78,14 @@ function getFiltered(){
     if(currentFilters.naturaleza && r.naturaleza !== currentFilters.naturaleza) return false;
     if(currentFilters.tipo && !r.tipos_split.includes(currentFilters.tipo)) return false;
     if(currentFilters.dictamen && r.dictamen !== currentFilters.dictamen) return false;
-    if(currentFilters.entidad && !(r.entidad||"").toLowerCase().includes(currentFilters.entidad.toLowerCase())) return false;
+    if(currentFilters.entidad){
+      const buscado = normalizarEnte(currentFilters.entidad);
+      const actual  = normalizarEnte(r.entidad);
+      // Si lo escrito coincide exactamente con un ente de la lista, se filtra solo ese ente;
+      // si no, se mantiene la búsqueda parcial (p. ej. "Los Cabos").
+      if(hayEnteExacto(buscado)){ if(actual !== buscado) return false; }
+      else if(!actual.includes(buscado)) return false;
+    }
     return true;
   });
 }
