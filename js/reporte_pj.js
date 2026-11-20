@@ -71,28 +71,6 @@ const rptFechaLarga = d => d.toLocaleDateString("es-MX", { day: "numeric", month
 const rptHora = d => d.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false });
 const rptSuma = a => a.reduce((s, x) => s + x, 0);
 
-function rptTextoResumen(datos, c, fecha) {
-  const t = c.total;
-  const conEstatus = datos.filter(r => r.estatus);
-  const totEst = rptSuma(conEstatus.map(r => r.exp));
-  const topEst = c.claves[0];
-  const topUbic = c.ubicaciones[0];
-  const ubicTotal = u => datos.filter(r => r.ubicacion === u).reduce((s, r) => s + r.exp, 0);
-  const topEnte = c.topEntes[0];
-  const sinNum = datos.filter(r => !r.exp).length;
-  const sinEst = datos.filter(r => !r.estatus).length;
-  const primero = c.anios[0], ultimo = c.anios[c.anios.length - 1];
-
-  const partes = [];
-  partes.push(`La hoja CONSOLIDADO DE FALTAS registra ${pjFmt(t)} expedientes radicados en ${c.entes} entes fiscalizables, correspondientes a las cuentas públicas ${primero} a ${ultimo}.`);
-  partes.push(`${pjFmt(c.totNoGrave)} (${rptPct(c.totNoGrave, t)}) son faltas no graves, ${pjFmt(c.totGrave)} (${rptPct(c.totGrave, t)}) son faltas graves y ${pjFmt(c.totPenal)} (${rptPct(c.totPenal, t)}) son denuncias penales.`);
-  if (topEst) partes.push(`Del total de expedientes con estatus capturado, el más frecuente es "${pjNombreEstatus(topEst)}" con ${pjFmt(c.totalEst[topEst])} (${rptPct(c.totalEst[topEst], totEst)}).`);
-  if (topUbic) partes.push(`La mayor concentración se encuentra en ${pjNombreUbicacion(topUbic)}, con ${pjFmt(ubicTotal(topUbic))} expedientes.`);
-  if (topEnte) partes.push(`El ente con más expedientes es ${topEnte[0]} (${pjFmt(rptSuma(topEnte[1]))}).`);
-  if (sinNum || sinEst) partes.push(`Nota: ${sinNum} registros no tienen número de expedientes capturado y ${sinEst} no tienen estatus; aparecen en el anexo, pero no suman en las cifras anteriores.`);
-  return partes.join(" ");
-}
-
 /* ---------- Generación ---------- */
 
 async function pjGenerarReportePDF() {
@@ -122,7 +100,7 @@ async function pjGenerarReportePDF() {
     doc.setProperties({
       title: "Procedimientos Jurídicos — Consolidado de Faltas",
       subject: "Reporte institucional",
-      author: "Unidad de Evaluación y Control — CVASEBCS",
+      author: "Sistema de Análisis de Cuenta Pública",
       creator: "Sistema de Análisis de Cuenta Pública"
     });
 
@@ -176,14 +154,11 @@ async function pjGenerarReportePDF() {
     const num = { halign: "right" };
 
     /* ===== Encabezado de la primera página (sin logotipos) ===== */
-    doc.setFillColor(...RPT_VERDE); doc.rect(0, 0, W, 34, "F");
-    doc.setFillColor(...RPT_GUINDA); doc.rect(0, 34, W, 1.6, "F");
-    texto([226, 232, 228], 8.5, "bold");
-    doc.text("COMISIÓN DE VIGILANCIA DE LA AUDITORÍA SUPERIOR DEL ESTADO DE BAJA CALIFORNIA SUR", M, 10);
-    texto([255, 255, 255], 9.5, "normal"); doc.text("Unidad de Evaluación y Control", M, 15.5);
-    texto([255, 255, 255], 22, "bold"); doc.text("Procedimientos Jurídicos", M, 25);
-    texto([226, 232, 228], 11); doc.text("Reporte del Consolidado de Faltas", M, 31);
-    y = 43;
+    doc.setFillColor(...RPT_VERDE); doc.rect(0, 0, W, 28, "F");
+    doc.setFillColor(...RPT_GUINDA); doc.rect(0, 28, W, 1.6, "F");
+    texto([255, 255, 255], 22, "bold"); doc.text("Procedimientos Jurídicos", M, 14);
+    texto([226, 232, 228], 11); doc.text("Reporte del Consolidado de Faltas", M, 22);
+    y = 37;
 
     texto(RPT_SUAVE, 8.5);
     doc.text(`Generado el ${rptFechaLarga(ahora)}, ${rptHora(ahora)} h`, M, y);
@@ -211,12 +186,12 @@ async function pjGenerarReportePDF() {
     });
     y += kh + 8;
 
-    /* ===== Resumen ===== */
-    titulo("1", "Resumen");
-    parrafo(rptTextoResumen(datos, c, ahora), 10, RPT_TEXTO);
+    /* ===== Nota sobre registros incompletos ===== */
+    const sinNum = datos.filter(r => !r.exp).length, sinEst = datos.filter(r => !r.estatus).length;
+    if (sinNum || sinEst) parrafo(`Nota: ${sinNum} registros de la hoja no tienen número de expedientes capturado y ${sinEst} no tienen estatus; no suman en las cifras.`, 8.5, RPT_SUAVE);
 
     /* ===== Evolución ===== */
-    titulo("2", "Evolución por cuenta pública y gravedad", 118);
+    titulo("1", "Evolución por cuenta pública y gravedad", 118);
     imagen(rptGrafica("pj-ch-anio", cfg["pj-ch-anio"], 820, 270), M, ANCHO);
     tabla({
       head: [["Cuenta pública", "No grave", "Grave", "Denuncia penal", "Total"]],
@@ -230,7 +205,7 @@ async function pjGenerarReportePDF() {
     });
 
     /* ===== Ubicación ===== */
-    titulo("3", "Ubicación del expediente", 118);
+    titulo("2", "Ubicación del expediente", 118);
     imagen(rptGrafica("pj-ch-ubicacion", cfg["pj-ch-ubicacion"], 820, 300), M, ANCHO);
     const porUbic = (u, t) => datos.filter(r => r.ubicacion === u && r.tipo === t).reduce((s, r) => s + r.exp, 0);
     const filasUbic = c.ubicaciones.map(u => {
@@ -244,8 +219,8 @@ async function pjGenerarReportePDF() {
     });
 
     /* ===== Entes ===== */
-    titulo("4", "Entes con más expedientes", 100);
-    parrafo(`Se muestran los 10 entes con más expedientes de un total de ${c.entes}. El detalle completo está en el anexo.`, 8.5, RPT_SUAVE);
+    titulo("3", "Entes con más expedientes", 100);
+    parrafo(`Se muestran los 10 entes con más expedientes de un total de ${c.entes}.`, 8.5, RPT_SUAVE);
     const porEnte = {};
     datos.forEach(r => { (porEnte[r.ente] = porEnte[r.ente] || c.anios.map(() => 0))[c.anios.indexOf(r.anio)] += r.exp; });
     const entes = Object.entries(porEnte).sort((a, b) => rptSuma(b[1]) - rptSuma(a[1]) || a[0].localeCompare(b[0])).slice(0, 10);
@@ -263,7 +238,7 @@ async function pjGenerarReportePDF() {
     });
 
     /* ===== Estatus ===== */
-    titulo("5", "Estatus actual de los expedientes", 135);
+    titulo("4", "Estatus actual de los expedientes", 135);
     const g1 = rptGrafica("pj-ch-estatus", cfg["pj-ch-estatus"], 430, 340);
     const g2 = rptGrafica("pj-ch-estatus-anio", cfg["pj-ch-estatus-anio"], 430, 340);
     const mitad = (ANCHO - 4) / 2;
@@ -285,7 +260,7 @@ async function pjGenerarReportePDF() {
     });
 
     /* ===== Casos con avance ===== */
-    titulo("6", "Casos con resolución o instancia judicial");
+    titulo("5", "Casos con resolución o instancia judicial");
     if (c.casos.length) {
       tabla({
         head: [["Cuenta pública", "Ente fiscalizable", "Ubicación", "Detalle"]],
@@ -296,7 +271,7 @@ async function pjGenerarReportePDF() {
     } else parrafo("No hay casos con resolución o instancia judicial registrados.", 9.5, RPT_SUAVE);
 
     /* ===== Sin respuesta ===== */
-    titulo("7", "Entes sin respuesta");
+    titulo("6", "Entes sin respuesta");
     if (c.sinRespuesta.length) {
       tabla({
         head: [["Cuenta pública", "Ente fiscalizable", "Ubicación"]],
@@ -306,30 +281,6 @@ async function pjGenerarReportePDF() {
       });
     } else parrafo("Ningún ente aparece como \"sin respuesta\".", 9.5, RPT_SUAVE);
 
-    /* ===== Anexo: toda la hoja (horizontal) ===== */
-    doc.addPage("letter", "landscape");
-    const WL = doc.internal.pageSize.getWidth();
-    const anchoL = WL - 24;
-    y = TOP;
-    texto(RPT_VERDE, 13, "bold");
-    doc.setFillColor(...RPT_GUINDA); doc.rect(12, y, 1.6, 6.2, "F");
-    doc.text("Anexo. Detalle completo del Consolidado de Faltas", 16.5, y + 4.8);
-    texto(RPT_SUAVE, 8.5);
-    doc.text(`${pjFmt(datos.length)} registros · se conserva el orden de la hoja`, WL - 12, y + 4.8, { align: "right" });
-    const anchos = [14, 0, 18, 27, 11, 38, 42, 0];
-    const fijo = rptSuma(anchos);
-    anchos[1] = Math.round((anchoL - fijo) * 0.62); anchos[7] = anchoL - fijo - anchos[1];
-    doc.autoTable({
-      ...estiloTabla,
-      startY: y + 10,
-      margin: { top: TOP, left: 12, right: 12, bottom: BOT },
-      head: [["Cuenta pública", "Ente fiscalizable", "Tipo de falta", "Fundamento", "Exp.", "Estatus", "Ubicación", "Detalle breve"]],
-      body: datos.map(r => [r.anio, r.ente, r.tipo, r.articulo, r.exp || "", r.estatus ? `${r.estatus} · ${ESTATUS_PROCEDIMIENTOS[r.estatus] || ""}`.replace(/ · $/, "") : "", r.ubicacion ? pjNombreUbicacion(r.ubicacion) : "", r.detalle]),
-      styles: { ...estiloTabla.styles, fontSize: 7.2, cellPadding: 1.3 },
-      columnStyles: Object.fromEntries(anchos.map((w, i) => [i, { cellWidth: w, ...(i === 0 ? { halign: "center" } : {}), ...(i === 4 ? { halign: "right" } : {}) }])),
-      rowPageBreak: "avoid"
-    });
-
     /* ===== Encabezado y pie de cada página ===== */
     const total = doc.getNumberOfPages();
     for (let i = 1; i <= total; i++) {
@@ -338,7 +289,6 @@ async function pjGenerarReportePDF() {
       const mg = w > h ? 12 : M;
       if (i > 1) {
         texto(RPT_SUAVE, 7.5, "bold"); doc.text("PROCEDIMIENTOS JURÍDICOS · CONSOLIDADO DE FALTAS", mg, 11);
-        texto(RPT_SUAVE, 7.5); doc.text("Unidad de Evaluación y Control · CVASEBCS", w - mg, 11, { align: "right" });
         doc.setDrawColor(...RPT_VERDE); doc.setLineWidth(0.5); doc.line(mg, 13.2, w - mg, 13.2);
       }
       doc.setDrawColor(...RPT_LINEA); doc.setLineWidth(0.2); doc.line(mg, h - 12, w - mg, h - 12);
