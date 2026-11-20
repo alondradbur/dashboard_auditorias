@@ -30,15 +30,15 @@
   <meta name="twitter:description" content="Unidad de Evaluación y Control de la CVASEBCS">
   <meta name="twitter:image" content="assets/og-image.png">
 
-  <link rel="stylesheet" href="css/reset.css?v=202611201045">
-  <link rel="stylesheet" href="css/variables.css?v=202611201045">
-  <link rel="stylesheet" href="css/layout.css?v=202611201045">
-  <link rel="stylesheet" href="css/sidebar.css?v=202611201045">
-  <link rel="stylesheet" href="css/header.css?v=202611201045">
-  <link rel="stylesheet" href="css/cards.css?v=202611201045">
-  <link rel="stylesheet" href="css/charts.css?v=202611201045">
-  <link rel="stylesheet" href="css/tables.css?v=202611201045">
-  <link rel="stylesheet" href="css/responsive.css?v=202611201045">
+  <link rel="stylesheet" href="css/reset.css?v=202611201130">
+  <link rel="stylesheet" href="css/variables.css?v=202611201130">
+  <link rel="stylesheet" href="css/layout.css?v=202611201130">
+  <link rel="stylesheet" href="css/sidebar.css?v=202611201130">
+  <link rel="stylesheet" href="css/header.css?v=202611201130">
+  <link rel="stylesheet" href="css/cards.css?v=202611201130">
+  <link rel="stylesheet" href="css/charts.css?v=202611201130">
+  <link rel="stylesheet" href="css/tables.css?v=202611201130">
+  <link rel="stylesheet" href="css/responsive.css?v=202611201130">
 </head>
 <body class="locked">
 <div class="login-overlay" id="loginOverlay">
@@ -369,6 +369,9 @@
         <select id="f-pj-anio"><option value="">Todas</option></select>
       </div>
       <div class="filter-group pj-fuente-wrap"><span id="pj-fuente" class="pj-fuente"></span></div>
+      <div class="filter-group pj-pdf-wrap">
+        <button type="button" id="btn-pj-pdf" class="btn-pdf" title="Descargar un reporte en PDF con toda la hoja CONSOLIDADO DE FALTAS"><span class="ico">⬇</span> <span class="txt">Reporte PDF</span></button>
+      </div>
     </div>
   </div>
 
@@ -444,17 +447,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 
-<script src="js/config.js?v=202611201045"></script>
-<script src="js/utils.js?v=202611201045"></script>
-<script src="js/auth.js?v=202611201045"></script>
-<script src="js/api.js?v=202611201045"></script>
-<script src="js/filters.js?v=202611201045"></script>
-<script src="js/kpis.js?v=202611201045"></script>
-<script src="js/charts.js?v=202611201045"></script>
-<script src="js/table.js?v=202611201045"></script>
-<script src="js/sections.js?v=202611201045"></script>
-<script src="js/procedimientos.js?v=202611201045"></script>
-<script src="js/app.js?v=202611201045"></script>
+<script src="js/config.js?v=202611201130"></script>
+<script src="js/utils.js?v=202611201130"></script>
+<script src="js/auth.js?v=202611201130"></script>
+<script src="js/api.js?v=202611201130"></script>
+<script src="js/filters.js?v=202611201130"></script>
+<script src="js/kpis.js?v=202611201130"></script>
+<script src="js/charts.js?v=202611201130"></script>
+<script src="js/table.js?v=202611201130"></script>
+<script src="js/sections.js?v=202611201130"></script>
+<script src="js/procedimientos.js?v=202611201130"></script>
+<script src="js/reporte_pj.js?v=202611201130"></script>
+<script src="js/app.js?v=202611201130"></script>
 
 </body>
 </html>

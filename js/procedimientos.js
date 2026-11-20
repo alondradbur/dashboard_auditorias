@@ -183,6 +183,42 @@ function pjEtiquetaBarra(horizontal, colorFijo) {
 // Estilo común de las barras: sin bordes desfasados y con grosor uniforme.
 const PJ_BARRA = { borderWidth: 1, borderColor: "#ffffff", borderSkipped: false, maxBarThickness: 64, categoryPercentage: 0.8, barPercentage: 0.9 };
 
+/* Configuraciones de las gráficas (las usan la vista y el reporte PDF) */
+function pjConfigs(c, todo) {
+  const cfg = {};
+  const leyenda = { position: "bottom", labels: { boxWidth: 14, boxHeight: 14, padding: 14, font: { size: 12 } } };
+  const base = { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 8, right: 14, bottom: 4, left: 4 } }, plugins: { legend: leyenda } };
+
+  const colorEst = (k, i) => PJ_COLOR_POR_ESTATUS[k] || PJ_COLORES_ESTATUS_RESPALDO[i % PJ_COLORES_ESTATUS_RESPALDO.length];
+  // 1) Evolución por cuenta pública y gravedad — etiquetas negras en negritas
+  cfg["pj-ch-anio"] = { type: "bar", data: { labels: todo.anios, datasets: [
+    { label: "No grave", data: todo.porAnioTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA },
+    { label: "Grave", data: todo.porAnioTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA },
+    { label: "Denuncia penal", data: todo.porAnioTipo["Denuncia Penal"], backgroundColor: PJ_COLORES.penal, ...PJ_BARRA }] },
+    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false, "#000000") } } };
+  // 2) Ubicación del Expediente — etiquetas negras en negritas, nombres de ubicación en varias líneas
+  cfg["pj-ch-ubicacion"] = { type: "bar", data: { labels: c.ubicaciones.map(pjNombreUbicacion), datasets: [
+    { label: "No grave", data: c.porUbicacionTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA, maxBarThickness: 38 },
+    { label: "Grave", data: c.porUbicacionTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA, maxBarThickness: 38 }] },
+    options: { ...base, indexAxis: "y", scales: {
+      x: { stacked: true, beginAtZero: true, grid: { color: "#e6e4dd" }, ticks: { precision: 0, font: { size: 12 } } },
+      y: { stacked: true, grid: { display: false }, ticks: { autoSkip: false, font: { size: 12 }, callback(v) { return pjEnvolver(this.getLabelForValue(v), 24); } } }
+    }, plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(true, "#000000") } } };
+  // 3) Estatus: un color fijo por clave y texto negro o blanco según el fondo
+  cfg["pj-ch-estatus"] = { type: "doughnut", data: { labels: c.claves.map(pjNombreEstatus), datasets: [
+    { data: c.claves.map(k => c.totalEst[k]), backgroundColor: c.claves.map(colorEst), borderColor: "#ffffff", borderWidth: 2 }] },
+    options: { ...base, cutout: "48%", plugins: { ...base.plugins, datalabels: {
+      color: ctx => pjTextoSobre(ctx.dataset.backgroundColor[ctx.dataIndex]),
+      font: { weight: "bold", size: 13 },
+      formatter: v => pjFmt(v),
+      display: ctx => { const t = ctx.dataset.data.reduce((s, x) => s + x, 0); const v = ctx.dataset.data[ctx.dataIndex]; return t > 0 && v / t >= 0.04; }
+    } } } };
+  cfg["pj-ch-estatus-anio"] = { type: "bar", data: { labels: c.anios, datasets: c.claves.map((k, i) => (
+    { label: pjNombreEstatus(k), data: c.estatusPorAnio[k], backgroundColor: colorEst(k, i), ...PJ_BARRA })) },
+    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false) } } };
+  return cfg;
+}
+
 function pjRender() {
   if (!PJ_DATOS) return;
   const sel = pjEl("f-pj-anio");
@@ -201,39 +237,8 @@ function pjRender() {
     <div class="kpi k2"><div class="label">Denuncias penales</div><div class="value">${pjFmt(c.totPenal)}</div><div class="sub">${pct(c.totPenal)}</div></div>
     <div class="kpi k3"><div class="label">Entes con expedientes</div><div class="value">${pjFmt(c.entes)}</div><div class="sub">entes únicos</div></div>`;
 
-  const leyenda = { position: "bottom", labels: { boxWidth: 14, boxHeight: 14, padding: 14, font: { size: 12 } } };
-  const base = { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 8, right: 14, bottom: 4, left: 4 } }, plugins: { legend: leyenda } };
-
-  // 1) Evolución por cuenta pública y gravedad — etiquetas negras en negritas
-  pjCrear("pj-ch-anio", { type: "bar", data: { labels: todo.anios, datasets: [
-    { label: "No grave", data: todo.porAnioTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA },
-    { label: "Grave", data: todo.porAnioTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA },
-    { label: "Denuncia penal", data: todo.porAnioTipo["Denuncia Penal"], backgroundColor: PJ_COLORES.penal, ...PJ_BARRA }] },
-    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false, "#000000") } } });
-
-  // 2) Ubicación del Expediente — etiquetas negras en negritas, nombres de ubicación en varias líneas
-  pjCrear("pj-ch-ubicacion", { type: "bar", data: { labels: c.ubicaciones.map(pjNombreUbicacion), datasets: [
-    { label: "No grave", data: c.porUbicacionTipo["No Grave"], backgroundColor: PJ_COLORES.noGrave, ...PJ_BARRA, maxBarThickness: 38 },
-    { label: "Grave", data: c.porUbicacionTipo["Grave"], backgroundColor: PJ_COLORES.grave, ...PJ_BARRA, maxBarThickness: 38 }] },
-    options: { ...base, indexAxis: "y", scales: {
-      x: { stacked: true, beginAtZero: true, grid: { color: "#e6e4dd" }, ticks: { precision: 0, font: { size: 12 } } },
-      y: { stacked: true, grid: { display: false }, ticks: { autoSkip: false, font: { size: 12 }, callback(v) { return pjEnvolver(this.getLabelForValue(v), 24); } } }
-    }, plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(true, "#000000") } } });
-
-  // 3) Estatus: un color fijo por clave y texto negro o blanco según el fondo
-  const colorEst = (k, i) => PJ_COLOR_POR_ESTATUS[k] || PJ_COLORES_ESTATUS_RESPALDO[i % PJ_COLORES_ESTATUS_RESPALDO.length];
-  pjCrear("pj-ch-estatus", { type: "doughnut", data: { labels: c.claves.map(pjNombreEstatus), datasets: [
-    { data: c.claves.map(k => c.totalEst[k]), backgroundColor: c.claves.map(colorEst), borderColor: "#ffffff", borderWidth: 2 }] },
-    options: { ...base, cutout: "48%", plugins: { ...base.plugins, datalabels: {
-      color: ctx => pjTextoSobre(ctx.dataset.backgroundColor[ctx.dataIndex]),
-      font: { weight: "bold", size: 13 },
-      formatter: v => pjFmt(v),
-      display: ctx => { const t = ctx.dataset.data.reduce((s, x) => s + x, 0); const v = ctx.dataset.data[ctx.dataIndex]; return t > 0 && v / t >= 0.04; }
-    } } } });
-
-  pjCrear("pj-ch-estatus-anio", { type: "bar", data: { labels: c.anios, datasets: c.claves.map((k, i) => (
-    { label: pjNombreEstatus(k), data: c.estatusPorAnio[k], backgroundColor: colorEst(k, i), ...PJ_BARRA })) },
-    options: { ...base, scales: pjEjes(true), plugins: { ...base.plugins, datalabels: pjEtiquetaBarra(false) } } });
+  const cfg = pjConfigs(c, todo);
+  Object.entries(cfg).forEach(([id, conf]) => pjCrear(id, conf));
 
   const max = Math.max(1, ...c.topEntes.flatMap(t => t[1]));
   pjEl("pj-heat").innerHTML = `<thead><tr><th>Ente fiscalizable</th>${c.anios.map(a => `<th style="text-align:right">${a}</th>`).join("")}<th style="text-align:right">Total</th></tr></thead><tbody>` +

@@ -321,3 +321,9 @@ header .pj-btn .txt{text-align:center;line-height:1.15;padding:0 6px;}
   #vista-pj .chart-wrap{height:320px;}
   #vista-pj .grid-2 .chart-wrap{height:360px;}
 }
+
+/* Botón Reporte PDF (Procedimientos Jurídicos) */
+.pj-pdf-wrap{display:flex;align-items:flex-end;}
+.btn-pdf{background:#6b1f2a;color:#fff;border:1px solid #6b1f2a;border-radius:6px;padding:9px 16px;font-size:13px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn-pdf:hover{background:#561820;}
+.btn-pdf:disabled{opacity:.65;cursor:progress;}
