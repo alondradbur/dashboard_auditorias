@@ -148,7 +148,13 @@ async function pjGenerarReportePDF() {
       asegurar(20);
       doc.autoTable({ ...estiloTabla, startY: y, ...opc,
         styles: { ...estiloTabla.styles, ...(opc.styles || {}) },
-        headStyles: { ...estiloTabla.headStyles, ...(opc.headStyles || {}) } });
+        headStyles: { ...estiloTabla.headStyles, ...(opc.headStyles || {}) },
+        didParseCell: d => {
+          // La fila de totales usa la misma alineación que su columna (números a la derecha)
+          const col = (opc.columnStyles || {})[d.column.index];
+          if (d.section === "foot" && col && col.halign) d.cell.styles.halign = col.halign;
+          if (opc.didParseCell) opc.didParseCell(d);
+        } });
       y = doc.lastAutoTable.finalY + 6;
     };
     const num = { halign: "right" };
